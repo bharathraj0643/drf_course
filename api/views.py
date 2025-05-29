@@ -7,7 +7,27 @@ from django.shortcuts import get_object_or_404
 
 from django.db.models import Max
 
+from rest_framework import generics
 
+
+class ProductListAPIView(generics.ListAPIView):
+    queryset = Product.objects.filter(stock__gt=0)
+    serializer_class = ProductSerializer
+
+
+class ProductDetailView(generics.RetrieveAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    lookup_url_kwarg = "product_id"
+
+
+class OrderListAPIView(generics.ListAPIView):
+    queryset = Order.objects.prefetch_related("items__product")
+    serializer_class = OrderSerializer
+
+
+"""
+# function based views
 @api_view(["GET"])
 def product_list(request):
     products = Product.objects.all()
@@ -27,6 +47,7 @@ def order_list(request):
     orders = Order.objects.prefetch_related('items__product')
     serializers = OrderSerializer(orders, many=True)
     return Response(serializers.data)
+"""
 
 
 @api_view(["GET"])
