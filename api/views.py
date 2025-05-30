@@ -14,8 +14,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
 
-class ProductListAPIView(generics.ListAPIView):
-    queryset = Product.objects.filter(stock__gt=0)
+class ProductListCreateAPIView(generics.ListCreateAPIView):
+    queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
 
@@ -66,8 +66,9 @@ def product_info(request):
     return Response(serializer.data)
 """
 
+
 class ProductInfoAPIView(APIView):
-    def get(self,request):
+    def get(self, request):
         products = Product.objects.all()
         serializer = ProductInfoSerializer(
             {
