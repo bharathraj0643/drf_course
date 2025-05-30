@@ -20,6 +20,8 @@ from api.filters import ProductFilter
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
 
+from api.filters import InStockFilterBackend
+
 
 class ProductListCreateAPIView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
@@ -29,9 +31,10 @@ class ProductListCreateAPIView(generics.ListCreateAPIView):
         DjangoFilterBackend,
         filters.SearchFilter,
         filters.OrderingFilter,
+        InStockFilterBackend,
     ]
-    search_fields = ['name','description']
-    ordering_fields = ['name','price','stock']
+    search_fields = ["name", "description"]
+    ordering_fields = ["name", "price", "stock"]
 
     def get_permissions(self):
         self.permission_classes = [AllowAny]
