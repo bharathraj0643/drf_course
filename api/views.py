@@ -11,6 +11,8 @@ from rest_framework import generics
 
 from rest_framework.permissions import IsAuthenticated
 
+from rest_framework.views import APIView
+
 
 class ProductListAPIView(generics.ListAPIView):
     queryset = Product.objects.filter(stock__gt=0)
@@ -49,7 +51,6 @@ def order_list(request):
     orders = Order.objects.prefetch_related('items__product')
     serializers = OrderSerializer(orders, many=True)
     return Response(serializers.data)
-"""
 
 
 @api_view(["GET"])
@@ -63,6 +64,20 @@ def product_info(request):
         }
     )
     return Response(serializer.data)
+"""
+
+class ProductInfoAPIView(APIView):
+    def get(self,request):
+        products = Product.objects.all()
+        serializer = ProductInfoSerializer(
+            {
+                "products": products,
+                "count": len(products),
+                "max_price": products.aggregate(max_price=Max("price"))["max_price"],
+            }
+        )
+        return Response(serializer.data)
+
 
 class UserOrderListAPIView(generics.ListAPIView):
     queryset = Order.objects.prefetch_related("items__product")
