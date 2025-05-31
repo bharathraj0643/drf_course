@@ -26,6 +26,10 @@ from rest_framework.pagination import PageNumberPagination, LimitOffsetPaginatio
 
 from rest_framework import viewsets
 
+from api.filters import OrderFilter
+from rest_framework.decorators import action
+
+
 # Product Views
 class ProductListCreateAPIView(generics.ListCreateAPIView):
     queryset = Product.objects.order_by("pk")
@@ -76,7 +80,7 @@ class ProductInfoAPIView(APIView):
             }
         )
         return Response(serializer.data)
-    
+
 
 # Order Views
 class OrderViewSet(viewsets.ModelViewSet):
@@ -84,6 +88,15 @@ class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
     permission_classes = [AllowAny]
     pagination_class = None
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = OrderFilter
+    permission_classes = [IsAuthenticated]
+
+    @action(detail=False, methods=["get"], url_path="user-orders")
+    def user_orders(self, request):
+        orders = self.get_queryset().filter(user=request.user)
+        serializer = self.get_serializer(orders, many=True)
+        return Response(serializer.data)
 
 
 """
