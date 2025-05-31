@@ -24,7 +24,9 @@ from api.filters import InStockFilterBackend
 
 from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
 
+from rest_framework import viewsets
 
+# Product Views
 class ProductListCreateAPIView(generics.ListCreateAPIView):
     queryset = Product.objects.order_by("pk")
     serializer_class = ProductSerializer
@@ -63,9 +65,25 @@ class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
         return super().get_permissions()
 
 
-class OrderListAPIView(generics.ListAPIView):
+class ProductInfoAPIView(APIView):
+    def get(self, request):
+        products = Product.objects.all()
+        serializer = ProductInfoSerializer(
+            {
+                "products": products,
+                "count": len(products),
+                "max_price": products.aggregate(max_price=Max("price"))["max_price"],
+            }
+        )
+        return Response(serializer.data)
+    
+
+# Order Views
+class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.prefetch_related("items__product")
     serializer_class = OrderSerializer
+    permission_classes = [AllowAny]
+    pagination_class = None
 
 
 """
@@ -105,17 +123,11 @@ def product_info(request):
 """
 
 
-class ProductInfoAPIView(APIView):
-    def get(self, request):
-        products = Product.objects.all()
-        serializer = ProductInfoSerializer(
-            {
-                "products": products,
-                "count": len(products),
-                "max_price": products.aggregate(max_price=Max("price"))["max_price"],
-            }
-        )
-        return Response(serializer.data)
+"""
+# class based view of ORDERS
+class OrderListAPIView(generics.ListAPIView):
+    queryset = Order.objects.prefetch_related("items__product")
+    serializer_class = OrderSerializer
 
 
 class UserOrderListAPIView(generics.ListAPIView):
@@ -126,3 +138,4 @@ class UserOrderListAPIView(generics.ListAPIView):
     def get_queryset(self):
         qs = super().get_queryset()
         return qs.filter(user=self.request.user)
+"""
