@@ -60,3 +60,23 @@ GET http://localhost:8000/orders/46f3dac9-4bb6-41f2-9030-37ddb38acc7e HTTP/1.1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ4ODM3NTUzLCJpYXQiOjE3NDg4MzcyNTMsImp0aSI6Ijc4YzY3NGU5MjhlOTQ4NjliNmRiMzE4ODRiZjRiYjE3IiwidXNlcl9pZCI6Mn0.E1vEzIyUvbUMLuMHDkvB7sFMj7Ik6Zu9yKDrWBk_1CA
 
 ###
+
+POST http://localhost:8000/orders/ HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ4ODQ2NjQ0LCJpYXQiOjE3NDg4NDYzNDQsImp0aSI6ImNhOWZkMWEwNjkzZDQzMDlhYjZjODMyMWFhN2I0OGFjIiwidXNlcl9pZCI6Mn0.5eFUMbDNjFpxrB-_cA9VxOrbJoB0BfCJWFyar38L_P0
+
+{
+    "status" : "Confirmed",
+    "items" : [
+        {
+            "product":1,
+            "quantity":2
+        },
+        {
+            "product":2,
+            "quantity":1
+        }
+    ]
+}     
+
+###
