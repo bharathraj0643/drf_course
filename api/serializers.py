@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import Product, Order, OrderItem
 
+from django.db import transaction
+
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -33,24 +35,41 @@ class OrderItemSerializer(serializers.ModelSerializer):
             "item_subtotal",
         )
 
+
 class OrderCreateSerializer(serializers.ModelSerializer):
     class OrderItemCreateSerializer(serializers.ModelSerializer):
         class Meta:
             model = OrderItem
-            fields = ('product','quantity')
+            fields = ("product", "quantity")
 
     order_id = serializers.UUIDField(read_only=True)
-    items = OrderItemCreateSerializer(many=True)
+    items = OrderItemCreateSerializer(many=True, required=False)
+
+    def update(self, instance, validated_data):
+        orderitem_data = validated_data.pop("items")
+
+        with transaction.atomic():
+            instance = super().update(instance, validated_data)
+
+            if orderitem_data is not None:
+                instance.items.all().delete()
+
+                for item in orderitem_data:
+                    OrderItem.objects.create(order=instance, **item)
+        
+        return instance
 
     def create(self, validated_data):
-        orderitem_data = validated_data.pop('items')
-        order = Order.objects.create(**validated_data)
+        orderitem_data = validated_data.pop("items")
 
-        for item in orderitem_data:
-            OrderItem.objects.create(order=order,**item)
-        
+        with transaction.atomic():
+            order = Order.objects.create(**validated_data)
+
+            for item in orderitem_data:
+                OrderItem.objects.create(order=order, **item)
+
         return order
-    
+
     class Meta:
         model = Order
         fields = (
@@ -59,9 +78,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             "status",
             "items",
         )
-        extra_kwargs = {
-            "user" : {"read_only" : True}
-        }
+        extra_kwargs = {"user": {"read_only": True}}
 
 
 class OrderSerializer(serializers.ModelSerializer):
